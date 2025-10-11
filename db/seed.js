@@ -2,7 +2,7 @@
 import 'dotenv/config';
 import { db } from './index.js';
 import bcrypt from 'bcryptjs';
-import { todos, user } from 'schema.js';
+import { todos, users } from './schema.js';
 
 async function seed() {
   console.log('Seeding database...');

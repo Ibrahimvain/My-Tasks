@@ -1,7 +1,7 @@
 // db/schema.js
 import { pgTable, serial, varchar, text, integer } from 'drizzle-orm/pg-core';
 
-export const user = pgTable('user', {
+export const users = pgTable('user', {
   id: serial('id').primaryKey(),
   username: varchar('username').notNull().unique(),
   password: varchar('password').notNull(),
