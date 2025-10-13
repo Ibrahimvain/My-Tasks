@@ -1,4 +1,6 @@
 // index.js
+import { serveStatic } from "@hono/node-server/serve-static";
+
 import "dotenv/config";
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
@@ -100,12 +102,32 @@ app.post("/api/todos", async (c) => {
   }
 });
 
-// API GET
-app.get("/", (c) => {
-  return c.text("Halo, Saya sedang belajar API");
+// API Melihat Semua Todo Milik User
+app.get("/api/todos", async (c) => {
+  const token = getCookie(c, "token");
+  if (!token) return c.json({ success: false, message: "Unauhorized" }, 401);
+  try {
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    const userTodos = await db.query.todos.findMany({
+      where: (todos, { eq }) => eq(todos.userId, user.id),
+    });
+    return c.json({ success: true, data: userTodos });
+  } catch (error) {
+    return c.json({ success: false, message: "Unauthorized" }, 401);
+  }
 });
 
-// Jalankan server
-const port = 5000;
-console.log(`Server is running on http://localhost:${port}`);
-serve({ fetch: app.fetch, port });
+// Serve Static
+app.use("/*", serveStatic({ root: "./public" }));
+
+if (process.env.VERCEL) {
+  // Jika berjalan di Vercel, ekspor aplikasi Hono
+  // Vercel akan menangani servernya
+  console.log("Running on Vercel");
+  globalThis.app = app; // Pastikan app dapat diakses secara global oleh Vercel
+} else {
+  // Jika berjalan di lokal, jalankan server development
+  const port = 5000;
+  console.log(`✅ Server is running on http://localhost:${port}`);
+  serve({ fetch: app.fetch, port });
+}
