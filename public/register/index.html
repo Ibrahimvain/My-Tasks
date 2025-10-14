@@ -36,7 +36,7 @@
             body: JSON.stringify({ username, password }),
           });
 
-          const result = await response.josn();
+          const result = await response.json();
 
           if (result.success) {
             messageDiv.style.color = "green";
