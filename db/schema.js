@@ -1,14 +1,18 @@
 // db/schema.js
-import { pgTable, serial, varchar, text, integer } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, text, integer } from "drizzle-orm/pg-core";
+import { user } from "pg/lib/defaults";
 
-export const users = pgTable('user', {
-  id: serial('id').primaryKey(),
-  username: varchar('username').notNull().unique(),
-  password: varchar('password').notNull(),
+export const users = pgTable("user", {
+  id: serial("id").primaryKey(),
+  username: varchar("username").notNull().unique(),
+  password: varchar("password").notNull(),
 });
 
-export const todos = pgTable('todos', {
-  id: serial('id').primaryKey(),
-  note: text('note').notNull(),
-  userId: integer('user_id').references(() => user.id).notNull(),
+export const todos = pgTable("todos", {
+  id: serial("id").primaryKey(),
+  note: text("note").notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  status: varchar("status", { length: 50 }).default("pending").notNull(),
 });

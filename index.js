@@ -117,6 +117,9 @@ app.get("/api/todos", async (c) => {
   }
 });
 
+// API Edit Todos
+api.put("/")
+
 // Serve Static
 app.use("/*", serveStatic({ root: "./public" }));
 
