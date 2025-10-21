@@ -1,6 +1,6 @@
 // db/schema.js
 import { pgTable, serial, varchar, text, integer } from "drizzle-orm/pg-core";
-import { user } from "pg/lib/defaults";
+// import { user } from "pg/lib/defaults";
 
 export const users = pgTable("user", {
   id: serial("id").primaryKey(),

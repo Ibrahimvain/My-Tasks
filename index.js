@@ -6,12 +6,15 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { db } from "./db/index.js";
 import { users, todos } from "./db/schema.js";
-import bcrypt from "bcryptjs";
+import bcrypt, { decodeBase64 } from "bcryptjs";
 
 import jwt from "jsonwebtoken";
 import { setCookie } from "hono/cookie";
 
 import { getCookie } from "hono/cookie";
+
+import { and, eq } from "drizzle-orm";
+// import { createContext } from "react";
 
 const app = new Hono();
 
@@ -67,7 +70,7 @@ app.post("/api/login", async (c) => {
 });
 
 // API LOGOUT
-app.post("/logout", (c) => {
+app.post("/api/logout", (c) => {
   setCookie(c, "token", "", { maxAge: -1 });
   return c.json({ success: true, message: "Logout berhasil" });
 });
@@ -118,7 +121,55 @@ app.get("/api/todos", async (c) => {
 });
 
 // API Edit Todos
-api.put("/")
+app.put("/api/todos/:id/status", async (c) => {
+  // Dapatkan token dari cookie
+  const token = getCookie(c, "token");
+  if (!token) return c.json({ success: false, message: "Unauthorized" }, 401);
+
+  try {
+    // Verifikasi user dari token
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    const id = parseInt(c.req.param("id"));
+    const { status } = await c.req.json();
+
+    const updatedTodo = await db
+      .update(todos)
+      .set({ status })
+      .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
+      .returning();
+
+    if (updatedTodo.length === 0)
+      return c.json({ success: false, message: "Todo not found" }, 404);
+    return c.json({ success: true, data: updatedTodo[0] });
+  } catch (error) {
+    return c.json({ success: "false", message: "Unauthorized" }, 401);
+  }
+});
+
+// API delete todo
+app.delete("/api/todos/:id", async (c) => {
+  // Dapatkan token dari cookie
+  const token = getCookie(c, "token");
+  if (!token) return c.json({ success: false, message: "Unauthorized" }, 401);
+
+  try {
+    // verifikasi user dari token
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    const id = parseInt(c.req.param("id"));
+    // const { status } = await c.req.json();
+
+    const deletedTodo = await db
+      .delete(todos)
+      .where(and(eq(todos.id, id), eq(todos.userId, user.id)))
+      .returning();
+
+    if (deletedTodo.length === 0)
+      return c.json({ success: false, message: "Todo not found" }, 404);
+    return c.json({ success: true, message: "Todo deleted" });
+  } catch (error) {
+    return c.json({ success: "false", message: "Unauthorized" }, 401);
+  }
+});
 
 // Serve Static
 app.use("/*", serveStatic({ root: "./public" }));

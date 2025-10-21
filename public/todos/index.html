@@ -4,6 +4,186 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Todos</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f5f7fa;
+        color: #2c3e50;
+        line-height: 1.6;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      div {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e1e5eb;
+      }
+
+      h1 {
+        color: #2c3e50;
+        font-weight: 600;
+      }
+
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      a {
+        color: #3498db;
+        text-decoration: none;
+        padding: 8px 16px;
+        border: 1px solid #3498db;
+        border-radius: 5px;
+        transition: all 0.3s;
+      }
+
+      a:hover {
+        background-color: #3498db;
+        color: white;
+      }
+
+      #addTodoForm {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+
+      #noteInput {
+        flex: 1;
+        padding: 12px 15px;
+        border: 1px solid #e1e5eb;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+
+      #noteInput:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      button[type="submit"] {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 12px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #2980b9;
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        transition: all 0.3s;
+      }
+
+      .todo-item:hover {
+        background-color: #e9ecef;
+      }
+
+      .todo-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #3498db;
+      }
+
+      .todo-text {
+        margin-left: 12px;
+        flex: 1;
+        font-size: 16px;
+      }
+
+      .completed {
+        text-decoration: line-through;
+        color: #7f8c8d;
+      }
+
+      .todo-item button {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 14px;
+      }
+
+      .todo-item button:hover {
+        background-color: #c0392b;
+      }
+
+      #todoList {
+        list-style: none;
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+
+        div {
+          padding: 20px;
+        }
+
+        header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+        }
+
+        #addTodoForm {
+          flex-direction: column;
+        }
+
+        .todo-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .todo-text {
+          margin-left: 0;
+        }
+
+        .todo-item button {
+          align-self: flex-end;
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -54,21 +234,143 @@
         }
       })();
 
-      // 2. Fungsi untuk mengambil dan menampilkan todos
+      // 2. Fungsi fetchTodos
       const fetchTodos = async () => {
         try {
           const response = await fetch("/api/todos"); // Endpoint GET
           const { success, data } = await response.json();
+
           if (success) {
             todoList.innerHTML = ""; // Kosongkan daftar
             data.forEach((todo) => {
-              const li = document.createElement("li");
-              li.textContent = todo.note;
-              todoList.appendChild(li);
+              createTodoElement(todo); // Panggil fungsi pembuat elemen
             });
           }
         } catch (error) {
           console.error("Gagal mengambil todos: ", error);
+        }
+      };
+
+      // Function createTodoElement
+      const createTodoElement = (todo) => {
+        const li = document.createElement("li");
+        li.className = "todo-item";
+
+        // Buat checkbox
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = todo.status === "completed";
+
+        // Buat elemen untuk teks todo
+        const todoText = document.createElement("span");
+        todoText.textContent = todo.note;
+        todoText.className = "todo-text";
+
+        // Tambahkan class completed jika status completed
+        if (todo.status === "completed") {
+          todoText.classList.add("completed");
+        }
+
+        // Event listener untuk checkbox - panggil fungsi update
+        checkbox.addEventListener("change", () => {
+          updateTodoStatus(todo.id, checkbox.checked, todoText);
+        });
+
+        // Buat button delete
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Hapus";
+
+        // Event listener untuk delete - panggil fungsi delete
+        deleteButton.addEventListener("click", () => {
+          deleteTodo(todo.id, li);
+        });
+
+        li.appendChild(checkbox);
+        li.appendChild(todoText);
+        li.appendChild(deleteButton);
+        todoList.appendChild(li);
+      };
+
+      // Function updateTodoStatus
+      const updateTodoStatus = async (todoId, isChecked, todoTextElement) => {
+        try {
+          const newStatus = isChecked ? "completed" : "pending";
+
+          // Kirim request PUT untuk update status
+          const updateResponse = await fetch(`/api/todos/${todoId}/status`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: newStatus,
+            }),
+          });
+
+          // Cek dulu apakah response ok?
+          if (!updateResponse.ok) {
+            throw new Error(`HTTP Error! status: ${updateResponse.status}`);
+          }
+
+          const result = await updateResponse.json();
+
+          if (result.success) {
+            console.log(`Todo ${newStatus}!`);
+            // Update tampilan tanpa perlu fetch ulang
+            if (newStatus === "completed") {
+              todoTextElement.classList.add("completed");
+            } else {
+              todoTextElement.classList.remove("completed");
+            }
+          }
+        } catch (error) {
+          console.error("Gagal update todo: ", error);
+          // Rollback checkbox jika gagal
+          const checkbox = todoTextElement.previousElementSibling;
+          checkbox.checked = !isChecked;
+        }
+      };
+
+      // Function deleteTodo
+      const deleteTodo = async (todoId, liElement) => {
+        try {
+          // Konfirmasi dulu dengan user
+          if (!confirm("Yakin ingin menghapus todo ini?")) {
+            return; // Jika user batal, berhenti di sini
+          }
+
+          // ⭐ HAPUS DARI TAMPILAN DULU (biar cepat)
+          liElement.remove();
+
+          // Kirim request DELETE ke server
+          const deleteResponse = await fetch(`/api/todos/${todoId}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          // Cek response dari server
+          if (!deleteResponse.ok) {
+            throw new Error(`HTTP Error! status: ${deleteResponse.status}`);
+          }
+
+          const result = await deleteResponse.json();
+
+          if (result.success) {
+            console.log("Todo berhasil dihapus!");
+            // ✅ Todo sudah dihapus dari tampilan tadi
+          } else {
+            console.error("Gagal menghapus todo:", result.message);
+            // ❌ Jika server gagal, tampilkan lagi todo-nya
+            todoList.appendChild(liElement);
+            alert("Gagal menghapus todo: " + result.message);
+          }
+        } catch (error) {
+          console.error("Gagal delete todo: ", error);
+          // ❌ Jika error, tampilkan lagi todo-nya
+          todoList.appendChild(liElement);
+          alert("Terjadi error saat menghapus todo");
         }
       };
 

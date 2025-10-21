@@ -2,8 +2,101 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width", initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f5f7fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        width: 100%;
+        max-width: 400px;
+      }
+
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 600;
+      }
+
+      #message {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 14px;
+      }
+
+      #loginForm {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      input {
+        padding: 12px 15px;
+        border: 1px solid #e1e5eb;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 12px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+      }
+
+      p {
+        text-align: center;
+        margin-top: 20px;
+        color: #7f8c8d;
+      }
+
+      a {
+        color: #3498db;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      a:hover {
+        color: #2980b9;
+        text-decoration: underline;
+      }
+    </style>
   </head>
 
   <body>
@@ -41,9 +134,11 @@
             window.location.href = "/todos";
           } else {
             messageDiv.textContent = result.message || "Login gagal!";
+            messageDiv.style.color = "#e74c3c";
           }
         } catch (error) {
           messageDiv.textContent = "Terjadi kesalahan. Silakan coba lagi.";
+          messageDiv.style.color = "#e74c3c";
         }
       });
     </script>
