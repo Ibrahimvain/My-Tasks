@@ -15,16 +15,16 @@
           if (response.ok) {
             const { success } = await response.json();
             if (success) {
-              window.location.href = "/todos/index.html";
+              window.location.href = "./todos/index.html";
             } else {
-              window.location.href = "/login/index.html";
+              window.location.href = "./login/index.html"
             }
           } else {
-            window.location.href = "/login/index.html";
+            window.location.href = "./login/index.html";
           }
         } catch (error) {
           console.log("Error checking auth status: ", error);
-          window.location.href = "/login/index.html";
+          window.location.href = "./login/index.html";
         }
       })();
     </script>
